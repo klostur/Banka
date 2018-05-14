@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 
@@ -17,56 +18,58 @@ public class IO {
 		PDDocument document = new PDDocument();
 		PDPage page = new PDPage();
 		document.addPage(page);
+		float margineX = 40f;
+		float margineY = 40f;
+		float offsetY = page.getMediaBox().getHeight() - margineY;
 
 		try {
 			PDPageContentStream contentStream = new PDPageContentStream(document, page);
-			contentStream.setNonStrokingColor(Color.GRAY);
-			contentStream.addRect(15, 550, 580, 180);
-			contentStream.fill();
-			
-			contentStream.setNonStrokingColor(Color.black);
-			PDImageXObject pdImage = PDImageXObject.createFromFile("input/logo.jpg", document);
+			PDType1Font font = PDType1Font.COURIER.COURIER_BOLD_OBLIQUE;
+			int fontSize = 28;
+			String naslov = korisnik.getName() + " " + korisnik.getSurname();
+			float fontHeight = font.getFontDescriptor().getFontBoundingBox().getHeight() / 1000 * fontSize;
+			float fontWidth = font.getStringWidth(naslov) * fontSize / 1000;
 			contentStream.setLeading(15);
-			contentStream.drawImage(pdImage, 25, 660);
-			
+
 			contentStream.beginText();
-			contentStream.newLineAtOffset(80, 700);
-			contentStream.setFont(PDType1Font.COURIER_BOLD_OBLIQUE, 22);
-			contentStream.showText("DAVIDOVA BANKA");
-			contentStream.newLine();
-			contentStream.newLine();
-			contentStream.setFont(PDType1Font.TIMES_ITALIC, 14);
-			contentStream.showText("RC NOVI SAD 87 Ekspozitura 06");
-			contentStream.newLine();
+			contentStream.setFont(font, fontSize);
+			contentStream.newLineAtOffset((page.getMediaBox().getWidth() - fontWidth) / 2,
+					page.getMediaBox().getHeight() - margineX - fontHeight);// treba ti samo offset
+			contentStream.showText(naslov);
 			contentStream.endText();
+			offsetY -= fontHeight;
 			
-			contentStream.beginText();
-			contentStream.newLineAtOffset(200, 630);
-			contentStream.showText("PODACI O KORISNIKU");
-			contentStream.endText();
-			
-			contentStream.beginText();
-			contentStream.newLine();
-			contentStream.newLineAtOffset(25, 610);
-			contentStream.setFont(PDType1Font.TIMES_ROMAN, 14);
-			contentStream.showText(
-					"Ime i prezime " + korisnik.getName().toUpperCase() + " " + korisnik.getSurname().toUpperCase());
-			contentStream.newLine();
-			contentStream.showText("JMBG: " + korisnik.getJmbg());
-			contentStream.newLine();
-			contentStream.showText("Broj deviznog racuna: " + korisnik.getAccountNum());
-			contentStream.endText();
-			
-			contentStream.beginText();
-			contentStream.newLineAtOffset(450, 595);
-			contentStream.showText("POTPIS");
-			contentStream.endText();
-			
-			contentStream.moveTo(25, 620);
-			contentStream.lineTo(580, 620);
+			font = PDType1Font.TIMES_ROMAN;
+			fontSize = 20;
+			contentStream.setFont(font, fontSize);
+			fontHeight = font.getFontDescriptor().getFontBoundingBox().getHeight() / 1000 * fontSize;
+
+			contentStream.moveTo(margineX, offsetY - fontHeight );
+			contentStream.lineTo(page.getMediaBox().getWidth() - margineX, offsetY - fontHeight);
+			contentStream.setStrokingColor(Color.blue); // ha! stroking color
 			contentStream.stroke();
+			offsetY -= fontHeight; 
 			
+//			contentStream.moveTo(margineX, offsetY - fontHeight );
 			
+			String text = korisnik.getAccountNum().get(0); // samo za primer posto je svaki racun iste duzine
+			fontHeight = font.getFontDescriptor().getFontBoundingBox().getHeight() / 1000 * fontSize;
+			fontWidth = font.getStringWidth(text) * fontSize / 1000;
+			
+			for (int i = 0; i < korisnik.getAccountNum().size(); i++) {
+				text = korisnik.getAccountNum().get(i);
+				contentStream.beginText();
+				contentStream.newLineAtOffset(margineX, offsetY - fontHeight - (fontHeight/4) ); //ne znam zasto font height/4 radi
+				contentStream.showText(text);
+				contentStream.endText();
+				offsetY -= fontHeight;
+				
+				contentStream.moveTo(margineX, offsetY - fontHeight);
+				contentStream.lineTo(page.getMediaBox().getWidth() - margineX, offsetY - fontHeight);
+				contentStream.stroke();
+				offsetY -= fontHeight; 
+			}
+
 			contentStream.close();
 		} catch (IOException e1) {
 			e1.printStackTrace();
