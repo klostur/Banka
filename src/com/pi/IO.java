@@ -1,5 +1,6 @@
 package com.pi;
 
+
 import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -52,12 +53,12 @@ public class IO {
 			
 //			contentStream.moveTo(margineX, offsetY - fontHeight );
 			
-			String text = korisnik.getAccountNum().get(0); // samo za primer posto je svaki racun iste duzine
+			String text = korisnik.getAccountNum(); // samo za primer posto je svaki racun iste duzine
 			fontHeight = font.getFontDescriptor().getFontBoundingBox().getHeight() / 1000 * fontSize;
 			fontWidth = font.getStringWidth(text) * fontSize / 1000;
 			
-			for (int i = 0; i < korisnik.getAccountNum().size(); i++) {
-				text = korisnik.getAccountNum().get(i);
+			for (int i = 0; i < korisnik.getAccountNum().length(); i++) {
+				text = korisnik.getAccountNum();
 				contentStream.beginText();
 				contentStream.newLineAtOffset(margineX, offsetY - fontHeight - (fontHeight/4) ); //ne znam zasto font height/4 radi
 				contentStream.showText(text);
